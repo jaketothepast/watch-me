@@ -25,13 +25,18 @@ export default function SiteInput(props: SiteInputProps) {
             return;
         }
 
-        props.saveSite(site);
+        setSite(""); // Clear our input
+        props.saveSite(site); // Save the site.
     }
 
     return (
         <div className="site-input">
             <label htmlFor="site-input">Enter site to block:</label>
-            <input id="site-input" name="site-input" type="text" onInput={handleInput} />
+            <input id="site-input"
+                name="site-input"
+                type="text"
+                onInput={handleInput}
+                value={site} />
 
             <input id="submit" type="button" onClick={handleSubmit} value={"Submit"} />
         </div>
