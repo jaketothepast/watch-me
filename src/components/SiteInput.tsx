@@ -33,7 +33,7 @@ export default function SiteInput(props: SiteInputProps) {
             <label htmlFor="site-input">Enter site to block:</label>
             <input id="site-input" name="site-input" type="text" onInput={handleInput} />
 
-            <input id="submit" type="button" onClick={handleSubmit} />
+            <input id="submit" type="button" onClick={handleSubmit} value={"Submit"} />
         </div>
     );
 }
