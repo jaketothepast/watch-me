@@ -1,5 +1,3 @@
-import { useState } from 'react'
-import logo from './logo.svg'
 import './App.css'
 import SiteInput from './components/SiteInput'
 
@@ -9,7 +7,7 @@ function App() {
       <header>
         <p>Hello Vite + React!</p>
       </header>
-      <SiteInput />
+      <SiteInput saveSite={ (site) => console.log(site) }/>
     </div>
   )
 }
