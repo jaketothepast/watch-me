@@ -1,32 +1,31 @@
+import { useSetAtom } from "jotai";
 import { useState } from "react"
+import { sitesAtom } from "../state";
 
-type SaveFunction = (s: string) => void;
-interface SiteInputProps {
-    saveSite: SaveFunction,
-}
 
 /**
  * Handle the input/saving of one single site.
  */
-export default function SiteInput(props: SiteInputProps) {
+export default function SiteInput() {
     // Our site we are trying to store.
     const [site, setSite] = useState("");
+    const setSites = useSetAtom(sitesAtom);
 
-    function handleInput(e: InputEvent) {
+    function handleInput(e: React.FormEvent<HTMLInputElement>): void {
         setSite((e.target as HTMLInputElement).value);
     }
 
     /**
      * Don't submit if we don't have a valid site.
      **/
-    function handleSubmit(e: Event) {
+    function handleSubmit(e: React.FormEvent<HTMLInputElement>): void {
         // TODO: Handle more than the empty case.
         if (site === "") {
             return;
         }
 
         setSite(""); // Clear our input
-        props.saveSite(site); // Save the site.
+        setSites((sites) => Array.from(new Set([...sites, site])));
     }
 
     return (

@@ -1,27 +1,22 @@
-import { useState } from 'react'
 import './App.css'
 import SiteInput from './components/SiteInput'
 import SiteDisplay from './components/SiteDisplay';
-import { useAtom } from 'jotai';
-import { stateAtom } from './state';
-
-type SiteType = any[];
+import { useAtom, useAtomValue } from 'jotai';
+import { sitesAtom, stateAtom } from './state';
 
 function App() {
-  const [sites, setSites] = useState<SiteType>([]);
+  const sites = useAtomValue(sitesAtom);
 
   // Use/set the state of our application.
   const [state, setState] = useAtom(stateAtom);
 
-  function deleteSite(site: String) {
-    setSites(sites.filter(s => s !== site));
-  }
-
+  
   function startSession() {
-    setState('session');
+    setState('session-prep');
     // TODO: Add code to synchronize session with backend.
   }
 
+  
   return (
     <div className="App">
       <header>
@@ -30,14 +25,11 @@ function App() {
 
       <ul>
       {sites.map((site: string) => {
-        return <SiteDisplay key={site} deleteSite={() => deleteSite(site)} site={site} />
+        return <SiteDisplay key={site} site={site} />
       })}
       </ul>
 
-      <SiteInput saveSite={ (site: string) => {
-        const update = new Set([...sites, site]);
-        setSites(Array.from(update));
-      } }/>
+      <SiteInput />
 
       <button onClick={startSession}>Start Session</button>
     </div>
