@@ -3,6 +3,8 @@ import SiteInput from './components/SiteInput'
 import SiteDisplay from './components/SiteDisplay';
 import { useAtom, useAtomValue } from 'jotai';
 import { sitesAtom, stateAtom } from './state';
+import SessionConfigure from './views/SessionConfigure';
+import BuildSiteList from './views/BuildSiteList';
 
 function App() {
   const sites = useAtomValue(sitesAtom);
@@ -16,22 +18,24 @@ function App() {
     // TODO: Add code to synchronize session with backend.
   }
 
-  
+  let toDisplay = <p>Loading</p>;
+  switch (state) {
+      case 'editing':
+          toDisplay = <BuildSiteList />;
+          break;
+      case 'session-prep':
+          toDisplay = <SessionConfigure />;
+          break;
+      default:
+          toDisplay = <p>Loading...</p>;
+  }
   return (
     <div className="App">
       <header>
         <p>State: {state}</p>
       </header>
 
-      <ul>
-      {sites.map((site: string) => {
-        return <SiteDisplay key={site} site={site} />
-      })}
-      </ul>
-
-      <SiteInput />
-
-      <button onClick={startSession}>Start Session</button>
+      {toDisplay}
     </div>
   )
 }
