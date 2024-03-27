@@ -5,6 +5,7 @@ import { useAtom, useAtomValue } from 'jotai';
 import { sitesAtom, stateAtom } from './state';
 import SessionConfigure from './views/SessionConfigure';
 import BuildSiteList from './views/BuildSiteList';
+import ActiveSession from './views/ActiveSession';
 
 function App() {
   const sites = useAtomValue(sitesAtom);
@@ -25,6 +26,9 @@ function App() {
           break;
       case 'session-prep':
           toDisplay = <SessionConfigure />;
+          break;
+      case 'session-start':
+          toDisplay = <ActiveSession />;
           break;
       default:
           toDisplay = <p>Loading...</p>;

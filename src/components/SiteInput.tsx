@@ -1,15 +1,16 @@
-import { useSetAtom } from "jotai";
 import { useState } from "react"
-import { sitesAtom } from "../state";
 
+
+interface SiteInputProps {
+    saveSite: (s: string) => void
+}
 
 /**
  * Handle the input/saving of one single site.
  */
-export default function SiteInput() {
+export default function SiteInput({ saveSite }: SiteInputProps) {
     // Our site we are trying to store.
     const [site, setSite] = useState("");
-    const setSites = useSetAtom(sitesAtom);
 
     function handleInput(e: React.FormEvent<HTMLInputElement>): void {
         setSite((e.target as HTMLInputElement).value);
@@ -25,7 +26,7 @@ export default function SiteInput() {
         }
 
         setSite(""); // Clear our input
-        setSites((sites) => Array.from(new Set([...sites, site])));
+        saveSite(site);
     }
 
     return (
