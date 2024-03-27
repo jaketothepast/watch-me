@@ -1,24 +1,22 @@
 import './App.css'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { endAtAtom, sessionAtom, stateAtom } from './state';
+import { sitesAtom, stateAtom } from './state';
 import SessionConfigure from './views/SessionConfigure';
 import BuildSiteList from './views/BuildSiteList';
 
 function App() {
     // Use/set the state of our application.
     const [state, setState] = useAtom(stateAtom);
-    const session = useAtomValue(sessionAtom);
-    const setEndAt = useSetAtom<any>(endAtAtom);
+    const sites = useAtomValue(sitesAtom);
 
     function startSession() {
         setState('session-prep');
-        // TODO: Add code to synchronize session with backend.
     }
 
     function storeSession(endAt: Date): void {
-        // Store our endAt value.
-        setEndAt(endAt);
-
+        // Sync our session with storage
+        chrome.storage.sync.set({ session: { sites: sites, endAt: endAt.toJSON() } });
+        setState('session');
     }
 
     let toDisplay = <p>Loading</p>;
