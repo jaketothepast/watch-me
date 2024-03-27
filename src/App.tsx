@@ -1,47 +1,46 @@
 import './App.css'
-import SiteInput from './components/SiteInput'
-import SiteDisplay from './components/SiteDisplay';
-import { useAtom, useAtomValue } from 'jotai';
-import { sitesAtom, stateAtom } from './state';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { endAtAtom, sessionAtom, stateAtom } from './state';
 import SessionConfigure from './views/SessionConfigure';
 import BuildSiteList from './views/BuildSiteList';
-import ActiveSession from './views/ActiveSession';
 
 function App() {
-  const sites = useAtomValue(sitesAtom);
+    // Use/set the state of our application.
+    const [state, setState] = useAtom(stateAtom);
+    const session = useAtomValue(sessionAtom);
+    const setEndAt = useSetAtom<any>(endAtAtom);
 
-  // Use/set the state of our application.
-  const [state, setState] = useAtom(stateAtom);
+    function startSession() {
+        setState('session-prep');
+        // TODO: Add code to synchronize session with backend.
+    }
 
-  
-  function startSession() {
-    setState('session-prep');
-    // TODO: Add code to synchronize session with backend.
-  }
+    function storeSession(endAt: Date): void {
+        // Store our endAt value.
+        setEndAt(endAt);
 
-  let toDisplay = <p>Loading</p>;
-  switch (state) {
-      case 'editing':
-          toDisplay = <BuildSiteList />;
-          break;
-      case 'session-prep':
-          toDisplay = <SessionConfigure />;
-          break;
-      case 'session-start':
-          toDisplay = <ActiveSession />;
-          break;
-      default:
-          toDisplay = <p>Loading...</p>;
-  }
-  return (
-    <div className="App">
-      <header>
-        <p>State: {state}</p>
-      </header>
+    }
 
-      {toDisplay}
-    </div>
-  )
+    let toDisplay = <p>Loading</p>;
+    switch (state) {
+        case 'editing':
+            toDisplay = <BuildSiteList />;
+            break;
+        case 'session-prep':
+            toDisplay = <SessionConfigure storeSession={storeSession} />;
+            break;
+        default:
+            toDisplay = <p>Loading...</p>;
+    }
+    return (
+        <div className="App">
+            <header>
+                <p>State: {state}</p>
+            </header>
+
+            {toDisplay}
+        </div>
+    )
 }
 
 export default App

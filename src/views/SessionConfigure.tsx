@@ -2,14 +2,15 @@ import { useSetAtom } from "jotai";
 import { endAtAtom, stateAtom } from "../state";
 import { useMemo, useState } from "react";
 
-interface SessionConfigureProps {}
+interface SessionConfigureProps {
+    storeSession: (d: Date) => void
+}
 
 /**
  * Show the session configure view to the user.
  */
-export default function SessionConfigure({}:SessionConfigureProps) {
-    const setEndAt = useSetAtom<any>(endAtAtom);
-    const setState = useSetAtom<any>(stateAtom);
+export default function SessionConfigure({ storeSession }:SessionConfigureProps) {
+
     // Set the session time to be the results of the slider.
     const [sessionTime, setSessionTime] = useState(0);
     const sessionTimeText = useMemo(() => {
@@ -24,12 +25,11 @@ export default function SessionConfigure({}:SessionConfigureProps) {
     }
 
     /**
-     * Set our endAt time, and set a new state for the session
-     **/
-    function startSession() {
-        // EndAt has to be now + the number of hours added
-        setEndAt(new Date(new Date().getTime() + (sessionTime * 60 * 60 * 1000)));
-        setState('session-start');
+     * Convert sessionTime to a datetime, then call storeSession
+     */
+    function handleStoreSession(): void {
+        // sessionTime is in hours, so need to multiply to get ms.
+        storeSession(new Date(new Date().getTime() - (sessionTime * 60 * 60 * 1000)))
     }
 
     return (<>
@@ -38,7 +38,8 @@ export default function SessionConfigure({}:SessionConfigureProps) {
         <div>
             <input id="session-length" name="session-length" type="range" min="0" max="8" step="1" value={sessionTime} onInput={handleInput} />
             <label htmlFor="session-length">Session Length</label>
-            <button onClick={startSession}>Start Session</button>
+
+            <button id="store-session" onClick={() => handleStoreSession()}>Start Session</button>
         </div>
     </>)
 }
