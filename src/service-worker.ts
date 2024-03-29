@@ -6,6 +6,27 @@ function blockListener(details: chrome.webRequest.WebRequestBodyDetails): void {
     console.log(details.url.toString());
 }
 
+// Read the value from storage, and check to see if less than now.
+function shouldClearSession() {
+  chrome.storage.sync.get('session').then(function(o) {
+    // The session object should have the key that we are interested in it.
+    const session = o.session;
+    console.log("Retrieved:", session);
+
+    // If the session endAt is greater than now, clear the session.
+    const endAt = new Date(session.endAt);
+    if (endAt.getTime() >= new Date().getTime()) {
+      chrome.storage.sync.remove('session', function() {
+        console.log("removed session, session is complete")
+      })
+    } else {
+      setTimeout(shouldClearSession, 1000);
+    }
+  });
+}
+shouldClearSession();
+
+
 // Initial empty request filter.
 chrome.webRequest.onBeforeRequest.addListener(
     blockListener,
