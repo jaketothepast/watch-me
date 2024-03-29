@@ -2,8 +2,18 @@
 //
 //
 type WebRequestListener = (d: chrome.webRequest.WebRequestBodyDetails) => void;
+
 function blockListener(details: chrome.webRequest.WebRequestBodyDetails): void {
-    console.log(details.url.toString());
+  console.log("Received request for", details.url.toString());
+  // Send a notification
+  let notification: chrome.notifications.NotificationOptions = {
+    message: `Shouldn't be visiting ${details.url.toString()}`,
+    iconUrl: 'https://www.google.com/favicon.ico',
+    title: "Violation Detected",
+    type: "basic"
+  }
+
+  chrome.notifications.create(`notification-${Date.now()}`, notification)
 }
 
 // Read the value from storage, and check to see if less than now.
@@ -11,7 +21,6 @@ function shouldClearSession() {
   chrome.storage.sync.get('session').then(function(o) {
     // The session object should have the key that we are interested in it.
     const session = o.session;
-    console.log("Retrieved:", session);
 
     // If the session endAt is greater than now, clear the session.
     const endAt = new Date(session.endAt);
@@ -19,6 +28,8 @@ function shouldClearSession() {
       chrome.storage.sync.remove('session', function() {
         console.log("removed session, session is complete")
       })
+      // With the session clear, remove the listener that is listening for site requests as well.
+      chrome.webRequest.onBeforeRequest.removeListener(blockListener)
     } else {
       setTimeout(shouldClearSession, 1000);
     }
@@ -26,19 +37,11 @@ function shouldClearSession() {
 }
 shouldClearSession();
 
-
-// Initial empty request filter.
-chrome.webRequest.onBeforeRequest.addListener(
-    blockListener,
-    {urls: []},
-    []
-);
-
 /**
  * Create a new web request filter when new sessions are started.
  **/
-function makeWebRequestListener(sites: string[]): [WebRequestListener, chrome.webRequest.RequestFilter] {
-    return [blockListener, {urls: sites}]
+function makeWebRequestListener(sites: string[]): [WebRequestListener, chrome.webRequest.RequestFilter, string[]] {
+    return [blockListener, {urls: sites}, ['blocking']]
 }
 
 chrome.storage.onChanged.addListener((changes) => {
