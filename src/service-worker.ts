@@ -3,17 +3,43 @@
 //
 type WebRequestListener = (d: chrome.webRequest.WebRequestBodyDetails) => void;
 
-function blockListener(details: chrome.webRequest.WebRequestBodyDetails): void {
-  console.log("Received request for", details.url.toString());
-  // Send a notification
-  let notification: chrome.notifications.NotificationOptions = {
-    message: `Shouldn't be visiting ${details.url.toString()}`,
-    iconUrl: 'https://www.google.com/favicon.ico',
-    title: "Violation Detected",
-    type: "basic"
-  }
+// Global variable tracking all URLs that we have in the set.
+let urls = new Set([]);
 
-  chrome.notifications.create(`notification-${Date.now()}`, notification)
+function siteKey(u: URL): string {
+  return `watch-me.${u.hostname}`
+}
+
+function blockListener(details: chrome.webRequest.WebRequestBodyDetails): void {
+
+  // Parse latest URLs that we've seen through this function and cache them, only alert if not 
+  // present in the cache, clear out the cache after a certain amount of time.
+  console.log("Received request for", details.url.toString());
+  const seen = new URL(details.url.toString());
+
+  // Get the URL hash table
+  chrome.storage.sync.get(siteKey(seen), (o) => {
+    // Have we seen this before and we're within the 5 second window? Return early
+    if (o[siteKey(seen)] !== undefined) {
+      return;
+    }
+
+    // Send a notification
+    let notification: chrome.notifications.NotificationOptions = {
+      message: `Shouldn't be visiting ${seen.origin}`,
+      iconUrl: 'https://www.google.com/favicon.ico',
+      title: "Violation Detected",
+      type: "basic"
+    }
+
+    chrome.notifications.create(`notification-${Date.now()}`, notification)
+    // Set our site key - using computed property with site key
+    chrome.storage.sync.set({[`${siteKey(seen)}`]: 1});
+    // Set the timeout to delete it.
+    setTimeout(() => chrome.storage.sync.remove(siteKey(seen)), 5000);
+  });
+
+
 }
 
 // Read the value from storage, and check to see if less than now.
