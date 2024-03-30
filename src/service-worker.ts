@@ -6,6 +6,12 @@ type WebRequestListener = (d: chrome.webRequest.WebRequestBodyDetails) => void;
 // Global variable tracking all URLs that we have in the set.
 let urls = new Set([]);
 
+/**
+ * Site key stored by chrome storage.
+ * 
+ * @param u URL that we observed
+ * @returns the site key to store in chrome storage cache
+ */
 function siteKey(u: URL): string {
   return `watch-me.${u.hostname}`
 }
@@ -51,12 +57,24 @@ function shouldClearSession() {
     // If the session endAt is greater than now, clear the session.
     const endAt = new Date(session.endAt);
     if (endAt.getTime() >= new Date().getTime()) {
+      // Clear out the session object.
       chrome.storage.sync.remove('session', function() {
         console.log("removed session, session is complete")
       })
+
+      // Clear out all zombie site keys.
+      chrome.storage.sync.get(null, (o) => {
+        for (let key of Object.keys(o)) {
+          if (key.includes('watch-me.')) {
+            chrome.storage.sync.remove(key);
+          }
+        }
+      });
+
       // With the session clear, remove the listener that is listening for site requests as well.
       chrome.webRequest.onBeforeRequest.removeListener(blockListener)
     } else {
+      // Loop and check that the session is actually clear
       setTimeout(shouldClearSession, 1000);
     }
   });
